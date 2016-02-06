@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +90,7 @@ public class Java7Features {
      */
     public void catchingMultipleExceptionTypes() {
         try {
-            Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null, new String[]{});
+            Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -98,7 +101,7 @@ public class Java7Features {
      */
     public void easierExceptionHandlingForReflectiveMethods() {
         try {
-            Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null, new String[]{});
+            Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null);
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
@@ -125,7 +128,23 @@ public class Java7Features {
         absolute.getRoot();
     }
 
-    public void readingAndWritingFiles() {
+    public void readingAndWritingFiles() throws IOException {
+        Path path = Paths.get("/home/sevenlist/names.txt");
 
+        // read
+        byte[] bytes = Files.readAllBytes(path);
+        String content = new String(bytes, StandardCharsets.UTF_8);
+
+        // write
+        Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+
+        // read lines
+        List<String> lines = Files.readAllLines(path);
+
+        // write lines
+        Files.write(path, lines);
+
+        // append lines to a given file
+        Files.write(path, lines, StandardOpenOption.APPEND);
     }
 }
