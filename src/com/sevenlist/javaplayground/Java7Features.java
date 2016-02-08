@@ -1,28 +1,27 @@
 package com.sevenlist.javaplayground;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class Java7Features {
+
+    private String str;
 
     /**
      * https://docs.oracle.com/javase/7/docs/technotes/guides/language/binary-literals.html
      */
     public void binaryLiterals() {
-        byte aByte = (byte) 0b00100001; // 8
-        short aShort = (short) 0b1010000101000101; // 16
-        int anInt = 0b10100001010001011010000101000101; // 32
-        long aLong = 0b1010000101000101101000010100010110100001010001011010000101000101L; // 64, suffix L
+        byte aByte = (byte) 0b00100001; // 8 bit
+        short aShort = (short) 0b1010000101000101; // 16 bit
+        int anInt = 0b10100001010001011010000101000101; // 32 bit
+        long aLong = 0b1010000101000101101000010100010110100001010001011010000101000101L; // 64 bit, suffix L
     }
 
     /**
@@ -88,7 +87,7 @@ public class Java7Features {
      * <p>
      * Also consider "Rethrowing Exceptions with More Inclusive Type Checking".
      */
-    public void catchingMultipleExceptionTypes() {
+    public void catchMultipleExceptionTypes() {
         try {
             Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
@@ -128,8 +127,8 @@ public class Java7Features {
         absolute.getRoot();
     }
 
-    public void readingAndWritingFiles() throws IOException {
-        Path path = Paths.get("/home/sevenlist/names.txt");
+    public void readAndWriteSmallFiles() throws IOException {
+        Path path = Paths.get("/home/sevenlist/small-file.txt");
 
         // read
         byte[] bytes = Files.readAllBytes(path);
@@ -146,5 +145,114 @@ public class Java7Features {
 
         // append lines to a given file
         Files.write(path, lines, StandardOpenOption.APPEND);
+    }
+
+    public void readAndWriteLargeFiles() throws IOException {
+        Path path = Paths.get("/home/sevenlist/large-file.bin");
+        Reader reader = Files.newBufferedReader(path);
+        Writer writer = Files.newBufferedWriter(path);
+
+        InputStream in = Files.newInputStream(path);
+        OutputStream out = Files.newOutputStream(path);
+    }
+
+    public void saveInputStreamDataAsFile() throws IOException {
+        InputStream in = new URL("http://www.google.de").openStream();
+        Path path = Paths.get("/home/sevenlist/index.html");
+        Files.copy(in, path);
+    }
+
+    public void writeFileContentsToOutputStream() throws IOException {
+        Path path = Paths.get("/home/sevenlist/index.html");
+        Files.copy(path, System.out);
+    }
+
+    public void createFilesAndDirectories() throws IOException {
+        Path path = Paths.get("/exists/does-not-exist");
+        Files.createDirectory(path);
+
+        path = Paths.get("/does-not-exist-1/does-not-exist-2");
+        Files.createDirectories(path);
+
+        path = Paths.get("file.txt");
+        Files.createFile(path);
+
+        Files.createTempFile(null, ".txt"); // might return /tmp/1234405522364837194.txt as Path
+    }
+
+    /**
+     * Delete a nonempty directory: see {@link FileVisitor}.
+     */
+    public void copyMoveDeleteFiles() throws IOException {
+        Path fromPath = Paths.get("/from/path/file.txt");
+        Path toPath = Paths.get("/to/path/file.txt");
+
+        Files.move(fromPath, toPath, StandardCopyOption.ATOMIC_MOVE);
+
+        Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+
+        Path path = Paths.get("/a/file");
+        boolean deleted = Files.deleteIfExists(path); // delete(..) throws an exception instead
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Java7Features other = (Java7Features) o;
+        return Objects.equals(str, other.str); // short for: str != null ? str.equals(other.str) : other.str == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(str); // or: Objects.hash(one, two, three);
+    }
+
+    public void callToStringInANullSafeWay() {
+        String s = null;
+        String.valueOf(s); // instead of: if (s != null) s.toString(); -> returns "null"
+        Objects.toString(s, ""); // --> returns "" instead of "null"
+    }
+
+    public void compareNumbericTypes() {
+        Integer.compare(-1, Integer.MIN_VALUE); // x - y would cause a numeric overflow instead
+    }
+
+    public void logMessage() {
+        Logger.getGlobal().info("message");
+    }
+
+    public void checkForNull() {
+        Object obj = null;
+        Objects.requireNonNull(obj, "obj must not be null");
+    }
+
+    public void startProcess() throws Exception {
+        ProcessBuilder builder = new ProcessBuilder("grep", "-o", "[A-Za-z_][A-Za-z_0-9]*");
+        builder.redirectInput(Paths.get("src/com/sevenlist/javaplayground/Java7Features.java").toFile());
+        builder.redirectOutput(Paths.get("identifiers.txt").toFile());
+        Process process = builder.start();
+        boolean completed = process.waitFor(3, TimeUnit.SECONDS); // from Java SE 8
+
+        builder = new ProcessBuilder("ls", "-al");
+        builder.inheritIO(); // sets the stdin, stdout, and stderr streams of the process to those of the Java program
+        builder.start().waitFor();
+    }
+
+    public void useTryWithResourcesStatementWhenUsingURLClassLoader() throws Exception {
+        URL[] urls = {
+                new URL("file:junit-4.11.jar"),
+                new URL("file:hamcrest-core-1.3.jar")
+        };
+        try (URLClassLoader loader = new URLClassLoader(urls)) {
+            Class<?> klass = loader.loadClass("org.junit.runner.JUnitCore");
+        }
+    }
+
+    public void bitSet() {
+        byte firstByte = (byte) 0b10101100; // has the 2nd, 3rd, 5th, and 7th bit set
+        byte secondByte = (byte) 0b00101000; // has the 11th and 13th bit set
+        byte[] bytes = {firstByte, secondByte}; // little-endian (bytes from left to right)
+        BitSet.valueOf(bytes); // = {2, 3, 5, 7, 11, 13} bits are set
     }
 }
