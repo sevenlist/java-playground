@@ -3,12 +3,13 @@ package com.sevenlist.javaplayground;
 import java.lang.annotation.Repeatable;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import java.util.Locale.LanguageRange;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Java8Features {
 
@@ -89,5 +90,17 @@ public class Java8Features {
         if (matcher.matches()) {
             String city = matcher.group("city");
         }
+    }
+
+    public void findMatchingLocales() {
+        List<LanguageRange> ranges = Stream.of("de", "*-CH")
+                .map(LanguageRange::new)
+                .collect(Collectors.toList());
+
+        // or simply:
+        // List<LanguageRange> ranges = Arrays.asList(new LanguageRange("de"), new LanguageRange("*-CH"));
+
+        List<Locale> matches = Locale.filter(ranges, Arrays.asList(Locale.getAvailableLocales()));
+        // contains: de, de_CH, de_AT, de_LU, de_DE, de_GR, fr_CH, it_CH
     }
 }
