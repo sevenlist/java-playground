@@ -43,6 +43,52 @@ public class Java8Features {
         // divideUnsigned(..), remainedUnsigned(..)
     }
 
+    public void useComparators() {
+        Person sevenList = new Person("Seven", "List");
+        Person sevenMap = new Person("Seven", "Map");
+        Person[] persons = {sevenMap, sevenList};
+
+        // sort by first name then last name; returns: Seven List, Seven Map
+        Arrays.sort(persons, Comparator.comparing(Person::getFirstName).thenComparing(Person::getLastName));
+
+        // sort by length of last name; returns: Seven Map, Seven List
+        Arrays.sort(persons, Comparator.comparingInt(p -> p.getLastName().length()));
+
+        // sort by first name: list nulls first and then all by natural order; returns: null List, Seven Map, Seven List
+        Person nullList = new Person(null, "List");
+        persons = new Person[]{sevenMap, sevenList, nullList};
+        Arrays.sort(persons, Comparator.comparing(Person::getFirstName, Comparator.nullsFirst(Comparator.naturalOrder()))); // see also reverseOrder()
+    }
+
+    private static class Person {
+
+        private final String firstName;
+        private final String lastName;
+
+        public Person(String firstName, String lastName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+    }
+
+    public void useNavigableAndCheckedSet() {
+        NavigableSet s = new TreeSet();
+        s.addAll(Arrays.asList(1, 2, 3));
+
+        s.lower(2); // returns: 1
+
+        Collections.checkedNavigableSet(s, Integer.class);
+        s.add("4"); // throws ClassCastException
+    }
+
     public void encodeWithBase64() {
         String original = "username" + ":" + "password";
         Base64.getEncoder().encode(original.getBytes(StandardCharsets.UTF_8));
