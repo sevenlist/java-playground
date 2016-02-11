@@ -111,7 +111,7 @@ public class Java8Features {
 
         String value;
         value = optionalValue.orElse("otherValue"); // returns the optionalValue if present, otherwise returns other
-        value = optionalValue.orElseGet(() -> "for calculating" + " another optionalValue");
+        value = optionalValue.orElseGet(() -> "for calculating" + " another value");
         value = optionalValue.orElseThrow(IllegalArgumentException::new);
 
         Set<String> values = new HashSet<>();
