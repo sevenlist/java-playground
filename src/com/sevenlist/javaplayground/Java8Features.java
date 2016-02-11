@@ -2,6 +2,7 @@ package com.sevenlist.javaplayground;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 
 import java.lang.annotation.Repeatable;
 import java.math.BigInteger;
@@ -17,6 +18,18 @@ import java.util.stream.Stream;
 
 public class Java8Features {
 
+    /**
+     * Can consist of:
+     * 1. block of code
+     * 2. parameters
+     * 3. values of the "free parameters" that have been "captured" (= vars that are not passed as params and are not defined inside the code)
+     * <p>
+     * block of code + free variables = closure (enclosing scope), i.e. a Java lambda expression is a closure (as well as an inner class is a closure)
+     * <p>
+     * captured variables may not change (being effectively "final" w/o the need for that modifier) as this not would be thread-safe
+     * <p>
+     * "this" refers to the "this" parameter of the method that creates the lambda
+     */
     public void lambdaExpressions() {
         // single line
         Comparator<String> stringComparator = (String first, String second) -> Integer.compare(first.length(), second.length());
@@ -39,14 +52,34 @@ public class Java8Features {
     }
 
     @FunctionalInterface
-            // checks that a single abstract method is available + Javadoc statement
-    interface Greeter {
+    // This annotation checks that a single abstract method is available + Javadoc statement.
+    private interface Greeter {
         String sayHelloTo(String name);
     }
 
     public void biFunction() {
         BiFunction<String, String, String> function = (s1, s2) -> s1 + " " + s2 + "!";
         function.apply("Hello", "World");
+    }
+
+    /**
+     * Also possible: super::instanceMethod, EnclosingClass.this::method, and EnclosingClass.super::method.
+     */
+    public void methodReferences() {
+        // object::instanceMethod   x -> System.out.println(x)
+        new Button().setOnAction(System.out::println);
+
+        // Class::instanceMethod    (x, y) -> x.compareToIgnoreCase(y)
+        Arrays.sort(new String[]{"b", "a"}, String::compareToIgnoreCase);
+
+        // Class::staticMethod      (x, y) -> Math.pow(x, y)
+        BiFunction<Double, Double, Double> f = Math::pow;
+    }
+
+    public void constructorReferences() {
+        Stream<Button> buttonStream = Stream.of("OK", "Cancel").map(Button::new);
+
+        Button[] buttons = buttonStream.toArray(Button[]::new);
     }
 
     public void generalizedTargetTypeInference() {
@@ -141,11 +174,11 @@ public class Java8Features {
     }
 
     @Repeatable(Authors.class)
-    @interface Author {
+    private @interface Author {
         String name();
     }
 
-    @interface Authors {
+    private @interface Authors {
         Author[] value();
     }
 
