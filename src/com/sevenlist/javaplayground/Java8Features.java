@@ -36,6 +36,7 @@ public class Java8Features {
 
         // with inferred parameter types
         Comparator<String> stringComparator2 = (first, second) -> Integer.compare(first.length(), second.length());
+        // a better usage would be: Comparator.comparing(String::length)
 
         // multiple lines
         ((Greeter) name -> {
@@ -71,6 +72,12 @@ public class Java8Features {
          */
         default void sayHi() {
             System.out.println("Hi!");
+        }
+
+        /**
+         * no need for utility methods in companion classes anymore
+         */
+        static void factoryMethodOrHigherOrderFunction() {
         }
     }
 
