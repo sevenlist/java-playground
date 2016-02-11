@@ -87,7 +87,7 @@ public class Java8Features {
     }
 
     /**
-     * Also possible: super::instanceMethod, EnclosingClass.this::method, and EnclosingClass.super::method.
+     * Also possible: this:: instanceMethod, super::instanceMethod, EnclosingClass.this::method, and EnclosingClass.super::method.
      */
     public void methodReferences() {
         // object::instanceMethod   x -> System.out.println(x)
@@ -104,6 +104,26 @@ public class Java8Features {
         Stream<Button> buttonStream = Stream.of("OK", "Cancel").map(Button::new);
 
         Button[] buttons = buttonStream.toArray(Button[]::new);
+    }
+
+    public void optionalValues() {
+        Optional<String> optionalValue = Optional.ofNullable("value");
+
+        String value;
+        value = optionalValue.orElse("otherValue"); // returns the optionalValue if present, otherwise returns other
+        value = optionalValue.orElseGet(() -> "for calculating" + " another optionalValue");
+        value = optionalValue.orElseThrow(IllegalArgumentException::new);
+
+        Set<String> values = new HashSet<>();
+        optionalValue.ifPresent(values::add);
+
+        // If a value is present, apply the provided mapping function to it
+        // If the result is non-null, return an Optional describing the result. Otherwise return an empty Optional.
+        Optional<Boolean> added = optionalValue.map(values::add);
+
+        // flatMap(function) is like map(..) but it will not wrap the function's return value with an additional Optional
+        // the return type of optionalValue.map(Optional::ofNullable) is Optional<Optional<String>> - you do not want that
+        Optional<String> optionalString = optionalValue.flatMap(Optional::ofNullable);
     }
 
     public void generalizedTargetTypeInference() {
