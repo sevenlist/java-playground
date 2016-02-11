@@ -55,6 +55,23 @@ public class Java8Features {
     // This annotation checks that a single abstract method is available + Javadoc statement.
     private interface Greeter {
         String sayHelloTo(String name);
+
+        /**
+         * can be overridden
+         * <p>
+         * pattern "interface + abstract class" is no longer needed
+         * <p>
+         * if the method is defined elsewhere in the hierarchy:
+         * <p>
+         * 1. (super)classes win with their implementation! the default implementation will be ignored = compatability with Java 7
+         * <p>
+         * 2. two interfaces with the same method? (at least one has the "default" modifier) -> the conflict has to be
+         * resolved by overriding the method in the interface implementing class, choosing e.g. the to-use-default-implementation with
+         * e.g. Greeter.super.sayHi();
+         */
+        default void sayHi() {
+            System.out.println("Hi!");
+        }
     }
 
     public void biFunction() {
