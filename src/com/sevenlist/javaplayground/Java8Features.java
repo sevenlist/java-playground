@@ -94,7 +94,7 @@ public class Java8Features {
         new Button().setOnAction(System.out::println);
 
         // Class::instanceMethod    (x, y) -> x.compareToIgnoreCase(y)
-        Arrays.sort(new String[]{"b", "a"}, String::compareToIgnoreCase);
+        Arrays.sort(new String[] { "b", "a" }, String::compareToIgnoreCase);
 
         // Class::staticMethod      (x, y) -> Math.pow(x, y)
         BiFunction<Double, Double, Double> f = Math::pow;
@@ -163,7 +163,7 @@ public class Java8Features {
     public void comparators() {
         Person sevenList = new Person("Seven", "List");
         Person sevenMap = new Person("Seven", "Map");
-        Person[] persons = {sevenMap, sevenList};
+        Person[] persons = { sevenMap, sevenList };
 
         // sort by first name then last name; returns: Seven List, Seven Map
         Arrays.sort(persons, Comparator.comparing(Person::getFirstName).thenComparing(Person::getLastName));
@@ -173,7 +173,7 @@ public class Java8Features {
 
         // sort by first name: list nulls first and then all by natural order; returns: null List, Seven Map, Seven List
         Person nullList = new Person(null, "List");
-        persons = new Person[]{sevenMap, sevenList, nullList};
+        persons = new Person[] { sevenMap, sevenList, nullList };
         Arrays.sort(persons, Comparator.comparing(Person::getFirstName, Comparator.nullsFirst(Comparator.naturalOrder()))); // see also reverseOrder()
     }
 
