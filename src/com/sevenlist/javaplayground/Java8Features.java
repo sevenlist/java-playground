@@ -1,10 +1,14 @@
 package com.sevenlist.javaplayground;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+
 import java.lang.annotation.Repeatable;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Locale.LanguageRange;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,6 +16,42 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Java8Features {
+
+    public void lambdaExpressions() {
+        // single line
+        Comparator<String> stringComparator = (String first, String second) -> Integer.compare(first.length(), second.length());
+
+        // with inferred parameter types
+        Comparator<String> stringComparator2 = (first, second) -> Integer.compare(first.length(), second.length());
+
+        // multiple lines
+        ((Greeter) name -> {
+            String msg = "Hello, " + name + "!";
+            Logger.getGlobal().info(msg);
+            return msg;
+        }).sayHelloTo("sevenlist");
+
+        // without parameters
+        Runnable runnable = () -> System.out.println("Hi!");
+
+        // method has single parameter: parameter parantheses can be omitted
+        EventHandler<ActionEvent> listener = event -> System.out.println("Thanks for clicking!");
+    }
+
+    @FunctionalInterface
+            // checks that a single abstract method is available + Javadoc statement
+    interface Greeter {
+        String sayHelloTo(String name);
+    }
+
+    public void biFunction() {
+        BiFunction<String, String, String> function = (s1, s2) -> s1 + " " + s2 + "!";
+        function.apply("Hello", "World");
+    }
+
+    public void generalizedTargetTypeInference() {
+        List<String> names = Collections.emptyList(); // instead of: Collections.<String>emptyList()
+    }
 
     /**
      * The opposite of String.split(..).
@@ -37,13 +77,13 @@ public class Java8Features {
     /**
      * For file formats or network protocols that require them.
      */
-    public void useUnsignedValues() {
+    public void unsignedValues() {
         Byte.toUnsignedInt((byte) 246); // Byte, Short, and Integer also provide toUnsignedLong(..).
         Integer.compareUnsigned(Integer.MAX_VALUE + 1, Integer.MAX_VALUE + 2);
         // divideUnsigned(..), remainedUnsigned(..)
     }
 
-    public void useComparators() {
+    public void comparators() {
         Person sevenList = new Person("Seven", "List");
         Person sevenMap = new Person("Seven", "Map");
         Person[] persons = {sevenMap, sevenList};
@@ -79,7 +119,7 @@ public class Java8Features {
         }
     }
 
-    public void useNavigableAndCheckedSet() {
+    public void navigableAndCheckedSet() {
         NavigableSet s = new TreeSet();
         s.addAll(Arrays.asList(1, 2, 3));
 
@@ -125,12 +165,12 @@ public class Java8Features {
         Java8Features.class.getDeclaredMethod("reflectMethodParameter", String.class).getParameters()[0].getName(); // returns "param"
     }
 
-    public void useLazyMessage() {
+    public void lazyMessage() {
         // only constructs the message when the finest log level is active
         Logger.getGlobal().finest(() -> "a message that is expensive to construct");
     }
 
-    public void useRegExNamedCapturingGroup() {
+    public void regExNamedCapturingGroup() {
         Pattern pattern = Pattern.compile("(?<city>[\\p{L} ]+),\\s*(?<state>[A-Z]{2})");
         Matcher matcher = pattern.matcher("New York City, NY");
         if (matcher.matches()) {
