@@ -19,14 +19,17 @@ import java.util.stream.Stream;
 public class Java8Features {
 
     /**
+     * The point of all lambdas is deferred execution.
+     * <p>
      * Can consist of:
-     * 1. block of code
-     * 2. parameters
-     * 3. values of the "free parameters" that have been "captured" (= vars that are not passed as params and are not defined inside the code)
+     * <ul>
+     * <li>1. block of code</li>
+     * <li>2. parameters</li>
+     * <li>3. values of the "free parameters" that have been "captured" (= vars that are not passed as params and are not defined inside the code)</li>
+     * </ul>
+     * Block of code + free variables = closure (enclosing scope), i.e. a Java lambda expression is a closure (as well as an inner class is a closure)
      * <p>
-     * block of code + free variables = closure (enclosing scope), i.e. a Java lambda expression is a closure (as well as an inner class is a closure)
-     * <p>
-     * captured variables may not change (being effectively "final" w/o the need for that modifier) as this not would be thread-safe
+     * Captured variables may not change (being effectively "final" w/o the need for that modifier) as this not would be thread-safe.
      * <p>
      * "this" refers to the "this" parameter of the method that creates the lambda
      */
@@ -52,21 +55,33 @@ public class Java8Features {
         EventHandler<ActionEvent> listener = event -> System.out.println("Thanks for clicking!");
     }
 
+    /**
+     * The {@link FunctionalInterface} annotation checks that a single abstract method is available. A special statement
+     * will be visible in Javadoc as well.
+     * <p>
+     * For common functional interfaces see package {@link java.util.function}.
+     * <p>
+     * Remember: producer-extends, consumer-super (PECS).
+     * <ul>
+     * <li>Reading is covariant (subtypes are ok: List<? extends Person>)</li>
+     * <li>Writing is contravariant (supertypes are ok: List<? super Employee>)</li>
+     * <li>General rule: "super" for argument types, "extends" for return types</li>
+     * </ul>
+     */
     @FunctionalInterface
-    // This annotation checks that a single abstract method is available + Javadoc statement.
     private interface Greeter {
         String sayHelloTo(String name);
 
         /**
-         * can be overridden
+         * Can be overridden
          * <p>
-         * pattern "interface + abstract class" is no longer needed
+         * Pattern "interface + abstract class" is no longer needed
          * <p>
-         * if the method is defined elsewhere in the hierarchy:
+         * If the method is defined elsewhere in the hierarchy:
          * <p>
          * 1. (super)classes win with their implementation! the default implementation will be ignored = compatability with Java 7
          * <p>
-         * 2. two interfaces with the same method? (at least one has the "default" modifier) -> the conflict has to be
+         * 2. Two interfaces with the same method? (at least one has the "default" modifier) -> the conflict has to be
          * resolved by overriding the method in the interface implementing class, choosing e.g. the to-use-default-implementation with
          * e.g. Greeter.super.sayHi();
          */
@@ -75,7 +90,7 @@ public class Java8Features {
         }
 
         /**
-         * no need for utility methods in companion classes anymore
+         * No need for utility methods in companion classes anymore
          */
         static void factoryMethodOrHigherOrderFunction() {
         }
@@ -124,6 +139,12 @@ public class Java8Features {
         // flatMap(function) is like map(..) but it will not wrap the function's return value with an additional Optional
         // the return type of optionalValue.map(Optional::ofNullable) is Optional<Optional<String>> - you do not want that
         Optional<String> optionalString = optionalValue.flatMap(Optional::ofNullable);
+    }
+
+    /**
+     * See Evernote "Date and Time".
+     */
+    public void dateAndTime() {
     }
 
     public void generalizedTargetTypeInference() {
