@@ -154,6 +154,35 @@ public class Java8Features {
         Optional<String> optionalString = optionalValue.flatMap(Optional::ofNullable);
     }
 
+    public void createStreams() {
+        Stream<String> streamOfArray = Stream.of("seven", "seven", "list").distinct();
+
+        Stream<String> streamOfCollection = new ArrayList<String>().stream();
+
+        // would be an infinite stream without calling limit(..)
+        Stream<Double> streamOfOneHundredRandomNumbers = Stream.generate(Math::random).limit(100);
+
+        // would be an infinite stream without calling limit(..)
+        Stream<BigInteger> streamOfTwentyBigInts = Stream.iterate(BigInteger.ZERO, n -> n.add(BigInteger.ONE))
+                .peek(System.out::println) // for debugging - can also be used after filter(..) or map(..)
+                .limit(20);
+    }
+
+    public <T> Stream<T> combineStreams(Stream<? extends T> stream1, Stream<? extends T> stream2) {
+        return Stream.concat(stream1, stream2);
+    }
+
+    /**
+     * To sort a Collection use {@link Collections#sort}.
+     */
+    public void sortStreamElements(Stream<String> names) {
+        Stream<String> longestNamesFirst = names.sorted(Comparator.comparing(String::length).reversed());
+    }
+
+    public void splitAsStream(String content) {
+        Stream<String> words = Pattern.compile("[\\P{L}]+").splitAsStream(content);
+    }
+
     /**
      * See Evernote "Date and Time".
      */
