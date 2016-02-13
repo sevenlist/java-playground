@@ -4,9 +4,16 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.annotation.Repeatable;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.Locale.LanguageRange;
 import java.util.function.BiFunction;
@@ -16,6 +23,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Java is not quite a functional language as it uses functional interfaces (nominal typing).
+ */
 public class Java8Features {
 
     /**
@@ -61,6 +71,8 @@ public class Java8Features {
      * <p>
      * For common functional interfaces see package {@link java.util.function}.
      * <p>
+     * The usual name for the abstract method is "apply".
+     * <p>
      * Remember: producer-extends, consumer-super (PECS).
      * <ul>
      * <li>Reading is covariant (subtypes are ok: List<? extends Person>)</li>
@@ -70,6 +82,7 @@ public class Java8Features {
      */
     @FunctionalInterface
     private interface Greeter {
+
         String sayHelloTo(String name);
 
         /**
@@ -156,6 +169,31 @@ public class Java8Features {
      */
     public void joinStrings() {
         String.join(", ", "seven", "list"); // returns "seven, list"
+    }
+
+    public void readLinesFromFile() throws IOException {
+        try (Stream<String> lines = Files.lines(Paths.get("/home/sevenlist/file.txt"))) {
+            Optional<String> passwordEntry = lines.filter(s -> s.contains("password")).findFirst();
+        }
+    }
+
+    /**
+     * Unfortunately, the Scanner class has no lines() method.
+     */
+    public void readLinesFromURL(URL url) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            Stream<String> lines = reader.lines();
+        }
+    }
+
+    /**
+     * Does not enter subdirectories - use method walk(..) or find(..) instead.
+     * <p>
+     * DirectoryStream has nothing to do with Java 8 streams.
+     */
+    public void listFiles() throws IOException {
+        try (Stream<Path> directoryEntries = Files.list(Paths.get("/home/sevenlist"))) {
+        }
     }
 
     public void convenienceFeaturesOfNumericClasses() {
