@@ -151,7 +151,7 @@ public class Java8Features {
         Set<String> values = new HashSet<>();
         optionalValue.ifPresent(values::add);
 
-        // If a value is present, apply the provided mapping function to it
+        // If a value is present, apply the provided mapping function to it.
         // If the result is non-null, return an Optional describing the result. Otherwise return an empty Optional.
         Optional<Boolean> added = optionalValue.map(values::add);
 
@@ -244,6 +244,7 @@ public class Java8Features {
                 Person::getLastName,
                 Person::getFirstName,
                 (existingFirstName, newFirstName) -> existingFirstName + ", " + newFirstName));
+        // see also: personsWithEqualLastName.collect(Collectors.groupingBy(Person::getLastName))
 
         Map<String, Person> idToPersonAsTreeMap = personStream.collect(Collectors.toMap(
                 Person::getId,
@@ -265,6 +266,29 @@ public class Java8Features {
 
         // remember: there is peek(..) to continue working with a stream
         words.forEach(System.out::println);
+    }
+
+    public void groupingAndPartioningBy() {
+        Stream<Locale> locales = Stream.of(Locale.getAvailableLocales());
+
+        Map<String, List<Locale>> countryToLocaleList = locales.collect(Collectors.groupingBy(Locale::getCountry));
+        // countryToLocales.get("CH") yields [it_CH, de_CH, fr_CH]
+
+        Map<String, Set<Locale>> countryToLocaleSet = locales.collect(Collectors.groupingBy(Locale::getCountry, Collectors.toSet())); // downstream collector
+        // using Collectors.toConcurrentMap() is analog to using groupingByConcurrent(..)
+
+        // see also the downstream collectors: counting(), summingInt(..), minBy(..), maxBy(..)
+
+        Map<String, Set<String>> countryToLanguagesAsSet = locales.collect(Collectors.groupingBy(
+                l -> l.getDisplayCountry(),
+                Collectors.mapping(l -> l.getDisplayLanguage(), Collectors.toSet())));
+
+        Map<String, String> countryToLanguagesAsString = locales.collect(Collectors.groupingBy(
+                l -> l.getDisplayCountry(),
+                Collectors.mapping(l -> l.getDisplayLanguage(), Collectors.joining(", "))));
+
+        Map<Boolean, List<Locale>> englishAndOtherLocales = locales.collect(Collectors.partitioningBy(l -> l.getLanguage().equals("en")));
+        // englishAndOtherLocales.get(true) yields all english locales
     }
 
     /**
@@ -400,6 +424,15 @@ public class Java8Features {
         @Override
         public int hashCode() {
             return Objects.hashCode(lastName);
+        }
+
+        @Override
+        public String toString() {
+            return "Person{" +
+                    "id='" + id + '\'' +
+                    ", firstName='" + firstName + '\'' +
+                    ", lastName='" + lastName + '\'' +
+                    '}';
         }
     }
 
