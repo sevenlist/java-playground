@@ -268,7 +268,7 @@ public class Java8Features {
         words.forEach(System.out::println);
     }
 
-    public void groupingAndPartioningBy() {
+    public void collectStreamResultsUsingGroupingByAndPartioningBy() {
         Stream<Locale> locales = Stream.of(Locale.getAvailableLocales());
 
         Map<String, List<Locale>> countryToLocaleList = locales.collect(Collectors.groupingBy(Locale::getCountry));
