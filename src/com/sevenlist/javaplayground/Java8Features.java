@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.Locale.LanguageRange;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +30,9 @@ import java.util.stream.Stream;
  * Java is not quite a functional language as it uses functional interfaces (nominal typing).
  */
 public class Java8Features {
+
+    private final Person[] persons = new Person[] { new Person("Seven", "Map"), new Person("Seven", "List") };
+    ;
 
     /**
      * The point of all lambdas is deferred execution.
@@ -213,10 +217,8 @@ public class Java8Features {
 
     /**
      * Terminal operations - the stream cannot be used again after calling them.
-     * <p>
-     * Remember: There is peek(..) to continue working with a stream.
      */
-    public void collectStreamResults(Stream<String> words) {
+    public void collectStreamResultsAsArrayOrCollections(Stream<String> words) {
         String[] wordsAsArray = words.toArray(String[]::new);
 
         List<String> wordsAsList = words.collect(Collectors.toList());
@@ -225,8 +227,34 @@ public class Java8Features {
         Set<String> wordsAsSet = words.parallel().collect(HashSet::new, HashSet::add, HashSet::addAll);
         // in short: words.collect(Collectors.toSet())
 
-        TreeSet<String> wordsAsTreeSet = words.collect(Collectors.toCollection(TreeSet::new));
+        Set<String> wordsAsTreeSet = words.collect(Collectors.toCollection(TreeSet::new));
+    }
 
+    public void collectStreamResultsAsMap() {
+        Stream<Person> personStream = Arrays.stream(persons);
+
+        Map<String, String> personIdToLastName = personStream.collect(Collectors.toMap(Person::getId, Person::getLastName));
+
+        // Function.identity() returns the input argument, here i.e. the element of the stream = Person
+        Map<String, Person> idToPerson = personStream.collect(Collectors.toMap(Person::getId, Function.identity()));
+
+        // if the mapped keys may have duplicates use:
+        Stream<Person> personsWithEqualLastName = Arrays.asList(new Person("seven", "list"), new Person("eight", "list")).stream();
+        Map<String, String> lastNameToFirstNames = personsWithEqualLastName.collect(Collectors.toMap(
+                Person::getLastName,
+                Person::getFirstName,
+                (existingFirstName, newFirstName) -> existingFirstName + ", " + newFirstName));
+
+        Map<String, Person> idToPersonAsTreeMap = personStream.collect(Collectors.toMap(
+                Person::getId,
+                Function.identity(),
+                (existingPerson, newPerson) -> {
+                    throw new IllegalStateException();
+                },
+                TreeMap::new));
+    }
+
+    public void collectStreamResultsAsOtherTypes(Stream<String> words) {
         String commaSeparatedWords = words.collect(Collectors.joining(", "));
 
         String zeroToNineAsString = IntStream.rangeClosed(0, 9).mapToObj(Objects::toString).collect(Collectors.joining());
@@ -235,6 +263,7 @@ public class Java8Features {
         double averageWordLength = summary.getAverage();
         double maxWordLength = summary.getMax();
 
+        // remember: there is peek(..) to continue working with a stream
         words.forEach(System.out::println);
     }
 
@@ -323,10 +352,6 @@ public class Java8Features {
     }
 
     public void comparators() {
-        Person sevenList = new Person("Seven", "List");
-        Person sevenMap = new Person("Seven", "Map");
-        Person[] persons = { sevenMap, sevenList };
-
         // sort by first name then last name; returns: Seven List, Seven Map
         Arrays.sort(persons, Comparator.comparing(Person::getFirstName).thenComparing(Person::getLastName));
 
@@ -335,12 +360,14 @@ public class Java8Features {
 
         // sort by first name: list nulls first and then all by natural order; returns: null List, Seven Map, Seven List
         Person nullList = new Person(null, "List");
-        persons = new Person[] { sevenMap, sevenList, nullList };
-        Arrays.sort(persons, Comparator.comparing(Person::getFirstName, Comparator.nullsFirst(Comparator.naturalOrder()))); // see also reverseOrder()
+        Person[] threePersons = new Person[] { persons[0], persons[1], nullList };
+        Arrays.sort(threePersons, Comparator.comparing(Person::getFirstName, Comparator.nullsFirst(Comparator.naturalOrder())));
+        // see also reverseOrder()
     }
 
     private static class Person {
 
+        private final String id = UUID.randomUUID().toString();
         private final String firstName;
         private final String lastName;
 
@@ -349,12 +376,30 @@ public class Java8Features {
             this.lastName = lastName;
         }
 
+        public String getId() {
+            return id;
+        }
+
         public String getFirstName() {
             return firstName;
         }
 
         public String getLastName() {
             return lastName;
+        }
+
+        // Here, Persons are equal if they have an equal last name!
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Person person = (Person) o;
+            return Objects.equals(lastName, person.lastName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(lastName);
         }
     }
 
