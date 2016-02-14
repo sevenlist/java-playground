@@ -212,6 +212,33 @@ public class Java8Features {
     }
 
     /**
+     * Terminal operations - the stream cannot be used again after calling them.
+     * <p>
+     * Remember: There is peek(..) to continue working with a stream.
+     */
+    public void collectStreamResults(Stream<String> words) {
+        String[] wordsAsArray = words.toArray(String[]::new);
+
+        List<String> wordsAsList = words.collect(Collectors.toList());
+
+        // using a supplier, accumulator, and combiner
+        Set<String> wordsAsSet = words.parallel().collect(HashSet::new, HashSet::add, HashSet::addAll);
+        // in short: words.collect(Collectors.toSet())
+
+        TreeSet<String> wordsAsTreeSet = words.collect(Collectors.toCollection(TreeSet::new));
+
+        String commaSeparatedWords = words.collect(Collectors.joining(", "));
+
+        String zeroToNineAsString = IntStream.rangeClosed(0, 9).mapToObj(Objects::toString).collect(Collectors.joining());
+
+        IntSummaryStatistics summary = words.collect(Collectors.summarizingInt(String::length));
+        double averageWordLength = summary.getAverage();
+        double maxWordLength = summary.getMax();
+
+        words.forEach(System.out::println);
+    }
+
+    /**
      * To sort a Collection use {@link Collections#sort}.
      */
     public void sortStreamElements(Stream<String> names) {
