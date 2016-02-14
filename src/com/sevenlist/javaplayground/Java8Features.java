@@ -216,7 +216,7 @@ public class Java8Features {
     }
 
     /**
-     * Terminal operations - the stream cannot be used again after calling them.
+     * All methods for collecting stream results are terminal operations, i.e. the stream cannot be used again after calling them.
      */
     public void collectStreamResultsAsArrayOrCollections(Stream<String> words) {
         String[] wordsAsArray = words.toArray(String[]::new);
