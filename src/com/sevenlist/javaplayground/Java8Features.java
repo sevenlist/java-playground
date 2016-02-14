@@ -235,7 +235,7 @@ public class Java8Features {
 
         Map<String, String> personIdToLastName = personStream.collect(Collectors.toMap(Person::getId, Person::getLastName));
 
-        // Function.identity() returns the input argument, here i.e. the element of the stream = Person
+        // Function.identity() returns the input argument, i.e. here the element of the stream which is Person
         Map<String, Person> idToPerson = personStream.collect(Collectors.toMap(Person::getId, Function.identity()));
 
         // if the mapped keys may have duplicates use:
