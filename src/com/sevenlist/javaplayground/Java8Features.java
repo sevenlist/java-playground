@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.Locale.LanguageRange;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -168,8 +169,31 @@ public class Java8Features {
                 .limit(20);
     }
 
-    public <T> Stream<T> combineStreams(Stream<? extends T> stream1, Stream<? extends T> stream2) {
-        return Stream.concat(stream1, stream2);
+    /**
+     * Optional is returned because there is no valid result if the stream is empty.
+     */
+    public void reduceStreams(Stream<String> words, Stream<Integer> values) {
+        Optional<String> largestWord = words.max(String::compareToIgnoreCase);
+
+        Optional<String> firstStartingWithSev = words.filter(s -> s.startsWith("sev")).findFirst();
+
+        Optional<String> anyStartingWithSev = words.parallel().filter(s -> s.startsWith("sev")).findAny();
+
+        // see also allMatch(..) or noneMatch(..)
+        boolean aWordStartingWithSev = words.parallel().anyMatch(s -> s.startsWith("sev"));
+
+        // v0 op v1 op v2 op ... = vi op vi+1 0 = op(vi, vi+1)
+        // operation should be associative to allow efficient reduction with parallel streams: (x op y) op z = x op (y op z)
+        Optional<Integer> optionalSum = values.reduce((x, y) -> x + y); // better: values.reduce(Integer::sum)
+
+        // using identity (e op x = x) there is no need to deal with Optional
+        Integer sum = values.reduce(0, Integer::sum); // 0 is the identity for addition
+
+        // calculate the total length of strings with parallalized computation:
+        int identity = 0;
+        BiFunction<Integer, String, Integer> accumulator = (total, word) -> total + word.length();
+        BinaryOperator<Integer> combiner = (total1, total2) -> total1 + total2; // combines the results of the computations run in parallel
+        words.parallel().reduce(identity, accumulator, combiner); // better: words.mapToInt(String::length).sum()
     }
 
     /**
@@ -177,6 +201,14 @@ public class Java8Features {
      */
     public void sortStreamElements(Stream<String> names) {
         Stream<String> longestNamesFirst = names.sorted(Comparator.comparing(String::length).reversed());
+    }
+
+    public <T> Stream<T> combineStreams(Stream<? extends T> stream1, Stream<? extends T> stream2) {
+        return Stream.concat(stream1, stream2);
+    }
+
+    public void skipStreamElements(String content) {
+        Stream<String> words = Stream.of(content.split("[\\P{L}]+")).skip(2);
     }
 
     public void splitAsStream(String content) {
