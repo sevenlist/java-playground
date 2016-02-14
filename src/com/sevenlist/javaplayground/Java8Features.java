@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -169,6 +170,20 @@ public class Java8Features {
                 .limit(20);
     }
 
+    public void mapStreams(String words) {
+        Stream<String> streamOfWords = Arrays.asList(words).stream();
+
+        // here map(..) creates a stream of streams
+        Stream<Stream<Character>> streamOfStreamOfCharacters = streamOfWords.map(w -> characterStream(w));
+
+        // use flatMap(..) instead
+        Stream<Character> streamOfCharacters = streamOfWords.flatMap(w -> characterStream(w));
+    }
+
+    private Stream<Character> characterStream(String s) {
+        return IntStream.range(0, s.length()).mapToObj(s::charAt);
+    }
+
     /**
      * Optional is returned because there is no valid result if the stream is empty.
      */
@@ -186,10 +201,10 @@ public class Java8Features {
         // operation should be associative to allow efficient reduction with parallel streams: (x op y) op z = x op (y op z)
         Optional<Integer> optionalSum = values.reduce((x, y) -> x + y); // better: values.reduce(Integer::sum)
 
-        // using identity (e op x = x) there is no need to deal with Optional
+        // using identity (e op x = x) there is no need to deal with Optional - the identity value will be returned if the stream is empty
         Integer sum = values.reduce(0, Integer::sum); // 0 is the identity for addition
 
-        // calculate the total length of strings with parallalized computation:
+        // calculate the total length of strings using parallalized computation:
         int identity = 0;
         BiFunction<Integer, String, Integer> accumulator = (total, word) -> total + word.length();
         BinaryOperator<Integer> combiner = (total1, total2) -> total1 + total2; // combines the results of the computations run in parallel
