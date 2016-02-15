@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 public class Java8Features {
 
     private final Person[] persons = new Person[] { new Person("Seven", "Map"), new Person("Seven", "List") };
-    ;
 
     /**
      * The point of all lambdas is deferred execution.
