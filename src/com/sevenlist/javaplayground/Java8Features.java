@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
@@ -160,8 +161,10 @@ public class Java8Features {
         Optional<String> optionalString = optionalValue.flatMap(Optional::ofNullable);
     }
 
-    public void createStreams() {
+    public void createObjectStreams() {
         Stream<String> streamOfArray = Stream.of("seven", "seven", "list").distinct();
+
+        Arrays.stream(persons, 0, 1); // from, to
 
         Stream<String> streamOfCollection = new ArrayList<String>().stream();
 
@@ -172,6 +175,20 @@ public class Java8Features {
         Stream<BigInteger> streamOfTwentyBigInts = Stream.iterate(BigInteger.ZERO, n -> n.add(BigInteger.ONE))
                 .peek(System.out::println) // for debugging - can also be used after filter(..) or map(..)
                 .limit(20);
+    }
+
+    /**
+     * As usual, primitive type streams are more efficient then using streams with wrapped objects.
+     */
+    public void createPrimitiveTypeStreams(Stream<String> names) {
+        // see also: LongStream, DoubleStream
+        IntStream intStream = IntStream.of(1, 2, 3, 5, 8, 13);// range(..), rangeClosed(..)
+
+        Stream<Integer> integerStream = intStream.boxed();
+
+        IntStream lengthsOfNames = names.mapToInt(String::length);
+
+        LongStream randomLongs = new Random().longs(); // ints(), doubles()
     }
 
     public void mapStreams(String words) {
@@ -289,6 +306,39 @@ public class Java8Features {
 
         Map<Boolean, List<Locale>> englishAndOtherLocales = locales.collect(Collectors.partitioningBy(l -> l.getLanguage().equals("en")));
         // englishAndOtherLocales.get(true) yields all english locales
+    }
+
+    /**
+     * When the terminal method executes, all lazy intermediate stream operations will be parallelized.
+     * <p>
+     * Operations need to be (1) stateless and (2) executable in an arbitrary order.
+     */
+    public void parallelStreams() {
+        Stream<String> writtenNumbers = Stream.of("one", "two", "three", "one");
+
+        // parallelize a sequential stream
+        writtenNumbers.parallel();
+
+        // by default, most of the streams are ordered
+        // making them unordered() speeds up parallel processing - e.g. distinct() or limit(..)
+        // distinct() will not retaining the first of all equal elements anymore
+        writtenNumbers.unordered().parallel().distinct();
+    }
+
+    /**
+     * Since intermediate stream operations are lazy, it is possible to mutate the collection up to the point when the terminal operation executes.
+     */
+    public void modifyingTheCollectionBackingTheStream(List<String> namesList) {
+        Stream<String> namesStream = namesList.stream();
+        namesList.add("sevenlist"); // allowed
+        namesStream.count();
+
+        // This breaks noninterference!
+        namesList.stream().forEach(name -> {
+            if (name.length() > 13) {
+                namesList.remove(name); // throws ConcurrentModificationException
+            }
+        });
     }
 
     /**
