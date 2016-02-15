@@ -224,7 +224,7 @@ public class Java8Features {
         // using identity (e op x = x) there is no need to deal with Optional - the identity value will be returned if the stream is empty
         Integer sum = values.reduce(0, Integer::sum); // 0 is the identity for addition
 
-        // calculate the total length of strings using parallalized computation:
+        // calculate the total length of strings using parallelized computation:
         int identity = 0;
         BiFunction<Integer, String, Integer> accumulator = (total, word) -> total + word.length();
         BinaryOperator<Integer> combiner = (total1, total2) -> total1 + total2; // combines the results of the computations run in parallel
