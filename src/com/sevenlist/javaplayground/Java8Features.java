@@ -217,7 +217,7 @@ public class Java8Features {
         // see also allMatch(..) or noneMatch(..)
         boolean aWordStartingWithSev = words.parallel().anyMatch(s -> s.startsWith("sev"));
 
-        // v0 op v1 op v2 op ... = vi op vi+1 0 = op(vi, vi+1)
+        // v0 op v1 op v2 op ... = vi op vi+1 = op(vi, vi+1)
         // operation should be associative to allow efficient reduction with parallel streams: (x op y) op z = x op (y op z)
         Optional<Integer> optionalSum = values.reduce((x, y) -> x + y); // better: values.reduce(Integer::sum)
 
