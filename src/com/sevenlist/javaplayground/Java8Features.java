@@ -121,7 +121,7 @@ public class Java8Features {
     }
 
     /**
-     * Also possible: this:: instanceMethod, super::instanceMethod, EnclosingClass.this::method, and EnclosingClass.super::method.
+     * Also possible: this::instanceMethod, super::instanceMethod, EnclosingClass.this::method, and EnclosingClass.super::method.
      */
     public void methodReferences() {
         // object::instanceMethod   x -> System.out.println(x)
