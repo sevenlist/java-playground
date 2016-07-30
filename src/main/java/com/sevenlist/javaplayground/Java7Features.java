@@ -90,7 +90,8 @@ public class Java7Features {
     public void catchMultipleExceptionTypes() {
         try {
             Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+        }
+        catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -101,7 +102,8 @@ public class Java7Features {
     public void easierExceptionHandlingForReflectiveMethods() {
         try {
             Class.forName(Java7Features.class.getName()).getMethod("main").invoke(null);
-        } catch (ReflectiveOperationException e) {
+        }
+        catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
     }
@@ -252,7 +254,7 @@ public class Java7Features {
     public void bitSet() {
         byte firstByte = (byte) 0b10101100; // has the 2nd, 3rd, 5th, and 7th bit set
         byte secondByte = (byte) 0b00101000; // has the 11th and 13th bit set
-        byte[] bytes = {firstByte, secondByte}; // little-endian (bytes from left to right)
+        byte[] bytes = { firstByte, secondByte }; // little-endian (bytes from left to right)
         BitSet.valueOf(bytes); // = {2, 3, 5, 7, 11, 13} bits are set
     }
 }
